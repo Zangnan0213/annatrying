@@ -1,12 +1,4 @@
-document.addEventListener("DOMContentLoaded", function() {
-    // 防止未捕获的错误导致界面崩溃黑屏
-    window.onerror = function(message, source, lineno, colno, error) {
-        console.error("游戏发生错误: " + message + " 行号: " + lineno);
-        return false;
-    };
-
-    // 确保页面 DOM 完全加载后再启动游戏逻辑
-    document.addEventListener("DOMContentLoaded", function() {
+(function(){
 // ==================== 核心数据区 ====================
 const seasonCalendar = [
     {name:'🇦🇺 澳大利亚 (墨尔本)',q:1},{name:'🇨🇳 中国 (上海)',q:1},{name:'🇯🇵 日本 (铃鹿)',q:1},
@@ -31,13 +23,7 @@ const teamData = {
     'Stake F1 Team Kick Sauber': {tier:'low',bonus:0,color:'#52E252',drivers:[{name:'Nico Hulkenberg',skill:84},{name:'Gabriel Bortoleto',skill:73}],salary:12},
     'Williams Racing': {tier:'mid',bonus:4,color:'#64C4FF',drivers:[{name:'Alex Albon',skill:83},{name:'Carlos Sainz',skill:87}],salary:35}
 };
-        
-// 初始化 AI 研发数据，防止读取 undefined
-        Object.keys(teamData).forEach(t => {
-            teamData[t]._rdEngine = 0;
-            teamData[t]._rdAero = 0;
-            teamData[t]._rdChassis = 0;
-        });
+
 const characters = {
     elena:{id:'elena',name:'埃莱娜·罗西',gender:'女',personality:'开朗热情',role:'围场公关'},
     marcel:{id:'marcel',name:'马塞尔·杜邦',gender:'男',personality:'严谨高傲',role:'首席技师'},
@@ -892,78 +878,78 @@ function showSetupScreen(){
     };
 }
 
-// ==================== 底部按钮与初始化逻辑 ====================
-document.addEventListener("DOMContentLoaded", function() {
-
-    // 1. 定义安全绑定函数
-    function safeBind(id, event, callback) {
-        const el = document.getElementById(id);
-        if (el) {
-            el.addEventListener(event, callback);
-        }
+// ==================== 底部按钮绑定 ====================
+document.getElementById('skipBtn').addEventListener('click',()=>{
+    state.consecutiveSkips++;
+    if(state.consecutiveSkips>=3){
+        state.teamPrincipalRelation=Math.max(5,state.teamPrincipalRelation-15);
+        state.teamStatus=Math.max(5,state.teamStatus-12);
+        state.fame=Math.max(5,state.fame-10);
+        showNarrative('⚠️ <span class="warn">连续跳过！领队好感暴跌-15，地位-12！</span>');
+    }else{
+        state.teamStatus=Math.max(5,state.teamStatus-3);state.fame=Math.max(5,state.fame-2);
+        showNarrative('⚠️ <span class="text-sub">跳过行动：名望轻微降低。</span>');
     }
-
-    // 2. 绑定所有按钮
-    safeBind('skipBtn', 'click', () => {
-        state.consecutiveSkips++;
-        if(state.consecutiveSkips >= 3){
-            state.teamPrincipalRelation = Math.max(5, state.teamPrincipalRelation - 15);
-            state.teamStatus = Math.max(5, state.teamStatus - 12);
-            state.fame = Math.max(5, state.fame - 10);
-            showNarrative('⚠️ <span class="warn">连续跳过！领队好感暴跌-15，地位-12！</span>');
-        } else {
-            state.teamStatus = Math.max(5, state.teamStatus - 3);
-            state.fame = Math.max(5, state.fame - 2);
-            showNarrative('⚠️ <span class="text-sub">跳过行动：名望轻微降低。</span>');
-        }
-        consumeAction();
-    });
-
-    safeBind('relBtn', 'click', () => {
-        let rels = Object.values(state.relationships);
-        let html = '';
-        if(rels.length === 0) html = '<p style="text-align:center;color:var(--text-sub);padding:15px 0;">暂无社交数据</p>';
-        else {
-            rels.sort((a,b) => b.affection - a.affection).forEach(r => {
-                let color = r.affection >= 70 ? 'var(--green)' : r.affection >= 40 ? 'var(--orange)' : 'var(--red)';
-                let barWidth = Math.max(0, Math.min(100, r.affection));
-                let rivalTag = isRival(r.name) ? ' <span style="color:var(--red);font-size:10px;">⚡宿敌</span>' : '';
-                html += `<div class="chart-row"><span>${r.name}${rivalTag}</span><div class="chart-bar-bg"><div class="chart-bar-fill" style="width:${barWidth}%;background:${color};"></div></div><span>${r.affection}</span></div>`;
-            });
-        }
-        document.getElementById('relChart').innerHTML = html;
-        document.getElementById('relModal').style.display = 'flex';
-    });
-
-    safeBind('wdcBtn', 'click', () => {
-        let sorted = Object.entries(state.allDriverPoints).sort((a,b) => b[1] - a[1]);
-        let html = '';
-        sorted.forEach((e, i) => {
-            let isMe = e[0] === playerName();
-            let color = isMe ? 'var(--blue)' : isRival(e[0]) ? 'var(--red)' : '#fff';
-            html += `<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid rgba(255,255,255,0.05);font-size:13px;">
-                <span style="color:${color};"><span style="width:24px;display:inline-block;color:var(--text-sub);">${i+1}.</span> ${e[0]}</span>
-                <span style="color:var(--gold);font-weight:700;">${e[1]} pts</span></div>`;
-        });
-        document.getElementById('wdcChart').innerHTML = html;
-        document.getElementById('wdcModal').style.display = 'flex';
-    });
-
-    safeBind('rdBtn', 'click', () => showRdPanel());
-    safeBind('retireBtn', 'click', () => triggerRetirement('主动退役'));
-    
-    document.querySelectorAll('.modal').forEach(m => m.addEventListener('click', function(e){
-        if(e.target === this) this.style.display = 'none';
-    }));
-
-    // 3. 游戏启动
-    showSetupScreen();
+    consumeAction();
 });
 
-// ==================== 渲染函数 ====================
+document.getElementById('relBtn').addEventListener('click',()=>{
+    let rels=Object.values(state.relationships);let html='';
+    if(rels.length===0)html='<p style="text-align:center;color:var(--text-sub);padding:15px 0;">暂无社交数据</p>';
+    else{
+        rels.sort((a,b)=>b.affection-a.affection).forEach(r=>{
+            let color=r.affection>=70?'var(--green)':r.affection>=40?'var(--orange)':'var(--red)';
+            let barWidth=Math.max(0,Math.min(100,r.affection));
+            let rivalTag=isRival(r.name)?' <span style="color:var(--red);font-size:10px;">⚡宿敌</span>':'';
+            html+=`<div class="chart-row"><span>${r.name}${rivalTag}</span><div class="chart-bar-bg"><div class="chart-bar-fill" style="width:${barWidth}%;background:${color};"></div></div><span>${r.affection}</span></div>`;
+        });
+    }
+    document.getElementById('relChart').innerHTML=html;document.getElementById('relModal').style.display='flex';
+});
+
+document.getElementById('wdcBtn').addEventListener('click',()=>{
+    let sorted=Object.entries(state.allDriverPoints).sort((a,b)=>b[1]-a[1]);let html='';
+    sorted.forEach((e,i)=>{
+        let isMe=e[0]===playerName();
+        let color=isMe?'var(--blue)':isRival(e[0])?'var(--red)':'#fff';
+        let fw=isMe?'800':'500';
+        let rivalTag=isRival(e[0])?' ⚡':'';
+        html+=`<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid rgba(255,255,255,0.05);font-size:13px;">
+            <span style="color:${color};font-weight:${fw};"><span style="width:24px;display:inline-block;color:var(--text-sub);">${i+1}.</span> ${e[0]}${rivalTag}</span>
+            <span style="color:var(--gold);font-weight:700;">${e[1]} pts</span></div>`;
+    });
+    document.getElementById('wdcChart').innerHTML=html;document.getElementById('wdcModal').style.display='flex';
+});
+
+document.getElementById('rdBtn').addEventListener('click',()=>showRdPanel());
+document.getElementById('retireBtn').addEventListener('click',()=>triggerRetirement('主动退役'));
+document.querySelectorAll('.modal').forEach(m=>m.addEventListener('click',function(e){if(e.target===this)this.style.display='none';}));
+
+// ==================== 渲染 ====================
 function renderAll(){
-    const headerName = document.getElementById('headerName');
-    if(headerName) headerName.textContent = `第${state.generation}代: ${state.firstName} · ${state.lastName}`;
-    // (其余代码保持原样，建议也加上对元素是否存在的判断)
-    // ...
+    document.getElementById('headerName').textContent=`第${state.generation}代: ${state.firstName} · ${state.lastName}`;
+    document.getElementById('headerTeam').textContent=state.team?`${state.team} · ${state.position}`:(state.retired?'退役':state.position);
+    document.getElementById('headerBadge').textContent=`${state.year} Q${state.quarter} | ${state.age}岁`;
+
+    document.getElementById('drivingVal').textContent=state.driving;document.getElementById('drivingBar').style.width=state.driving+'%';
+    document.getElementById('fitnessVal').textContent=state.fitness;document.getElementById('fitnessBar').style.width=state.fitness+'%';
+    document.getElementById('healthVal').textContent=state.health;document.getElementById('healthBar').style.width=state.health+'%';
+    document.getElementById('fameVal').textContent=state.fame;document.getElementById('fameBar').style.width=state.fame+'%';
+    document.getElementById('wealthVal').textContent=state.wealth;document.getElementById('wealthBar').style.width=Math.max(0,Math.min(100,(state.wealth/5000)*100))+'%';
+    document.getElementById('teamStatusVal').textContent=state.teamStatus;document.getElementById('teamStatusBar').style.width=state.teamStatus+'%';
+
+    document.getElementById('wdcCount').textContent=state.wdcTitles;document.getElementById('fansCount').textContent=state.fans.toFixed(1);
+
+    let ach='';
+    if(state.wdcTitles>0)ach+=`<span class="stat-item gold">🏆 WDC×${state.wdcTitles}</span>`;
+    if(state.careerWins>0)ach+=`<span class="stat-item">🏁 ${state.careerWins}胜</span>`;
+    if(state.careerPodiums>0)ach+=`<span class="stat-item">🍾 ${state.careerPodiums}台</span>`;
+    if((state.position==='试车手'||state.position==='储备车手')&&!state.retired)ach+=`<span class="stat-item gold">📋 晋升 ${state.reserveProgress}%</span>`;
+    if(state.rdEngine+state.rdAero+state.rdChassis>0)ach+=`<span class="stat-item">🔧 研发 E${state.rdEngine}A${state.rdAero}C${state.rdChassis}</span>`;
+    if(state.rivals.length>0)ach+=`<span class="stat-item red">⚡ 宿敌${state.rivals.length}</span>`;
+    if(state.salary>0)ach+=`<span class="stat-item">💰 ${state.salary}万€/年</span>`;
+    document.getElementById('achievements').innerHTML=ach||'🏅 暂无荣誉';
 }
+
+showSetupScreen();
+})();

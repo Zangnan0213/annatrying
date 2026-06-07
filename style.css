@@ -100,3 +100,4 @@
         .rd-bar span:first-child { width: 60px; color: var(--text-sub); font-weight: 600; }
         .rd-bar-bg { flex: 1; height: 8px; background: rgba(255,255,255,0.08); border-radius: 4px; overflow: hidden; }
         .rd-bar-fill { height: 100%; border-radius: 4px; transition: width 0.4s ease; }
+        #bottom-btns { display: flex; gap: 8px; justify-content: center; padding: 8px 0; flex-wrap: wrap; }

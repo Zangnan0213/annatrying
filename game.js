@@ -1,4 +1,4 @@
-(function() {
+
     // 防止未捕获的错误导致界面崩溃黑屏
     window.onerror = function(message, source, lineno, colno, error) {
         console.error("游戏发生错误: " + message + " 行号: " + lineno);
@@ -966,4 +966,4 @@ function renderAll(){
 }
 
 showSetupScreen();
-})();
+

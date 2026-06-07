@@ -1,4 +1,12 @@
-(function(){
+(function() {
+    // 防止未捕获的错误导致界面崩溃黑屏
+    window.onerror = function(message, source, lineno, colno, error) {
+        console.error("游戏发生错误: " + message + " 行号: " + lineno);
+        return false;
+    };
+
+    // 确保页面 DOM 完全加载后再启动游戏逻辑
+    document.addEventListener("DOMContentLoaded", function() {
 // ==================== 核心数据区 ====================
 const seasonCalendar = [
     {name:'🇦🇺 澳大利亚 (墨尔本)',q:1},{name:'🇨🇳 中国 (上海)',q:1},{name:'🇯🇵 日本 (铃鹿)',q:1},
@@ -23,7 +31,13 @@ const teamData = {
     'Stake F1 Team Kick Sauber': {tier:'low',bonus:0,color:'#52E252',drivers:[{name:'Nico Hulkenberg',skill:84},{name:'Gabriel Bortoleto',skill:73}],salary:12},
     'Williams Racing': {tier:'mid',bonus:4,color:'#64C4FF',drivers:[{name:'Alex Albon',skill:83},{name:'Carlos Sainz',skill:87}],salary:35}
 };
-
+        
+// 初始化 AI 研发数据，防止读取 undefined
+        Object.keys(teamData).forEach(t => {
+            teamData[t]._rdEngine = 0;
+            teamData[t]._rdAero = 0;
+            teamData[t]._rdChassis = 0;
+        });
 const characters = {
     elena:{id:'elena',name:'埃莱娜·罗西',gender:'女',personality:'开朗热情',role:'围场公关'},
     marcel:{id:'marcel',name:'马塞尔·杜邦',gender:'男',personality:'严谨高傲',role:'首席技师'},

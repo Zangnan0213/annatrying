@@ -1,0 +1,12 @@
+node_modules/
+.pnpm-store/
+.DS_Store
+Thumbs.db
+*.log
+.coze/
+.cozeproj/
+server.js
+package.json
+pnpm-lock.yaml
+assets/
+styles/

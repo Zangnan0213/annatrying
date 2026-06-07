@@ -1,0 +1,25 @@
+{
+  "name": "f1-life-wdc-legend",
+  "version": "2.0.0",
+  "description": "F1人生 · WDC传奇 - 浏览器F1赛车人生模拟游戏",
+  "main": "index.html",
+  "scripts": {
+    "start": "npx serve -l 5000 -s",
+    "dev": "npx serve -l 5000 -s"
+  },
+  "keywords": [
+    "f1",
+    "formula1",
+    "racing",
+    "simulation",
+    "game",
+    "browser-game",
+    "text-adventure"
+  ],
+  "author": "",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": ""
+  }
+}

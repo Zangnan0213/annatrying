@@ -893,12 +893,15 @@ function showSetupScreen(){
 }
 
 // ==================== 底部按钮安全绑定 ====================
-function initEventListeners() {
-    // 使用辅助函数来安全绑定，防止 ID 不存在报错
-    const safeBind = (id, event, callback) => {
+// 使用 DOMContentLoaded 确保 HTML 先加载，再绑定事件
+document.addEventListener("DOMContentLoaded", function() {
+
+    function safeBind(id, event, callback) {
         const el = document.getElementById(id);
-        if (el) el.addEventListener(event, callback);
-    };
+        if (el) {
+            el.addEventListener(event, callback);
+        }
+    }
 
     safeBind('skipBtn', 'click', () => {
         state.consecutiveSkips++;
@@ -937,10 +940,8 @@ function initEventListeners() {
         sorted.forEach((e, i) => {
             let isMe = e[0] === playerName();
             let color = isMe ? 'var(--blue)' : isRival(e[0]) ? 'var(--red)' : '#fff';
-            let fw = isMe ? '800' : '500';
-            let rivalTag = isRival(e[0]) ? ' ⚡' : '';
             html += `<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid rgba(255,255,255,0.05);font-size:13px;">
-                <span style="color:${color};font-weight:${fw};"><span style="width:24px;display:inline-block;color:var(--text-sub);">${i+1}.</span> ${e[0]}${rivalTag}</span>
+                <span style="color:${color};"><span style="width:24px;display:inline-block;color:var(--text-sub);">${i+1}.</span> ${e[0]}</span>
                 <span style="color:var(--gold);font-weight:700;">${e[1]} pts</span></div>`;
         });
         document.getElementById('wdcChart').innerHTML = html;
@@ -949,12 +950,15 @@ function initEventListeners() {
 
     safeBind('rdBtn', 'click', () => showRdPanel());
     safeBind('retireBtn', 'click', () => triggerRetirement('主动退役'));
-
+    
+    // 模态框关闭
     document.querySelectorAll('.modal').forEach(m => m.addEventListener('click', function(e){
         if(e.target === this) this.style.display = 'none';
     }));
-}
 
+    // 初始化界面
+    showSetupScreen();
+});
 // 确保 DOM 加载完成后，调用绑定逻辑并初始化界面
 document.addEventListener("DOMContentLoaded", function() {
     initEventListeners();
